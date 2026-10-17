@@ -23,7 +23,7 @@ AI-powered message translation for Vencord, using any OpenAI-compatible chat API
   - **Lightning** — translate new incoming messages in the current channel as they arrive.
   - Each of these buttons has a first-use warning with **Don't show this warning again**.
 - **Token controls** — per-message token usage, prompt/completion/reasoning details on hover, and running token totals on the three chat bar buttons. The scrolling and live modes update their totals as messages are translated.
-- **Provider presets** — KoboldCPP, OpenAI, OpenRouter, Groq, Together AI, Mistral AI, DeepSeek, xAI, Cerebras, Fireworks AI, Ollama, LM Studio, or any custom OpenAI-compatible URL.
+- **Provider presets** — KoboldCPP (Local), OpenAI, OpenRouter, Groq, Together AI, Mistral AI, DeepSeek, xAI, Cerebras, Fireworks AI, Ollama, LM Studio, or any custom OpenAI-compatible URL.
 - **Useful settings** — model, temperature, max tokens, **Disable thinking**, **Test API connection**, and a choice of incoming/outgoing source and target languages.
 
 ## Installation
