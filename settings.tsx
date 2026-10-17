@@ -67,13 +67,13 @@ export const settings = definePluginSettings({
     provider: {
         type: OptionType.SELECT,
         displayName: "API provider",
-        description: "Pick a preset, or Other / custom URL for any OpenAI-compatible endpoint that is not listed",
+        description: "Pick a preset, or Other / custom URL for a compatible endpoint on a supported provider host or localhost",
         options: ProviderOptions
     },
     apiUrl: {
         type: OptionType.STRING,
         displayName: "API base URL",
-        description: "Leave empty to use the selected provider's default URL. You can also paste a full /chat/completions endpoint",
+        description: "Leave empty to use the selected provider's default URL. For custom providers, use a known provider host or localhost/127.0.0.1; arbitrary remote hosts are blocked by the native bridge",
         placeholder: "Leave empty for the provider default",
         default: ""
     },

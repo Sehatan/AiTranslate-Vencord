@@ -9,7 +9,7 @@ import { FluxDispatcher, SelectedChannelStore, UserStore } from "@webpack/common
 
 import { getTranslation, handleTranslate } from "./TranslationAccessory";
 import { finishTranslation, isTranslationInFlight, tryStartTranslation } from "./translationInFlight";
-import { translate } from "./utils";
+import { hasTranslatableText, translate } from "./utils";
 import { getMessageContent } from "./visibleMessages";
 
 const MAX_CONCURRENT_TRANSLATIONS = 2;
@@ -76,7 +76,8 @@ function enqueueMessage(message: Message) {
     if (!liveEnabled) return;
     if (getTranslation(message.id) || isTranslationInFlight(message.id) || queuedIds.has(message.id)) return;
 
-    if (!getMessageContent(message)) return;
+    const content = getMessageContent(message);
+    if (!content || !hasTranslatableText(content)) return;
 
     queuedIds.add(message.id);
     messageQueue.push(message);

@@ -46,6 +46,23 @@ export function getTokenCount(usage?: TokenUsage) {
         ?? ((usage.promptTokens ?? 0) + (usage.completionTokens ?? 0));
 }
 
+const URL_PATTERN = /(?:https?:\/\/|www\.)[^\s<>]+|\b(?:[a-z0-9-]+\.)+[a-z]{2,}(?::\d+)?(?:\/[^\s<>]*)?/gi;
+const DISCORD_TOKEN_PATTERN = /<a?:\w+:\d+>|<@!?\d+>|<@&\d+>|<#\d+>|<t:\d+(?::[tTdDfFR])?>|<id:\w+>/g;
+
+/**
+ * A message that only contains links, mentions, custom emoji, or punctuation
+ * has nothing useful to translate. Sending those to a model produces responses
+ * like "I can't access links" instead of a translation.
+ */
+export function hasTranslatableText(text: string) {
+    const remaining = text
+        .replace(URL_PATTERN, " ")
+        .replace(DISCORD_TOKEN_PATTERN, " ")
+        .trim();
+
+    return /[\p{L}\p{N}]/u.test(remaining);
+}
+
 interface ChatResult {
     text: string;
     usage?: TokenUsage;
@@ -364,15 +381,25 @@ async function translateText(text: string, sourceLang: string, targetLang: strin
 
     const targetName = GoogleLanguages[targetLang as keyof typeof GoogleLanguages] ?? targetLang;
 
+    const urls: string[] = [];
+    const textWithPlaceholders = text.replace(URL_PATTERN, match => {
+        urls.push(match);
+        return `[[[URL_${urls.length}]]]`;
+    });
+
+    const placeholderNote = urls.length
+        ? " Keep URL placeholders such as [[[URL_1]]] exactly unchanged."
+        : "";
+
     const noThinking = settings.store.disableThinking
         ? " Do not use chain-of-thought, hidden reasoning, or thinking tags. Respond directly with only the final translation."
         : "";
 
-    const systemPrompt = `You are a professional translator. Translate the text accurately and naturally. Output ONLY the translated text. Do not add explanations, notes, quotation marks, or any extra text.${noThinking}`;
+    const systemPrompt = `You are a professional translator. Translate the text accurately and naturally. Output ONLY the translated text. Do not add explanations, notes, quotation marks, or any extra text.${placeholderNote}${noThinking}`;
 
     const userPrompt = !sourceLang || sourceLang === "auto"
-        ? `Detect the language of the following text and translate it into ${targetName}:\n\n${text}`
-        : `Translate the following text from ${sourceName} to ${targetName}:\n\n${text}`;
+        ? `Detect the language of the following text and translate it into ${targetName}:\n\n${textWithPlaceholders}`
+        : `Translate the following text from ${sourceName} to ${targetName}:\n\n${textWithPlaceholders}`;
 
     const translation = await requestChat(
         systemPrompt,
@@ -380,9 +407,15 @@ async function translateText(text: string, sourceLang: string, targetLang: strin
         settings.store.maxTokens ?? 1024
     );
 
+    const restored = urls.reduce(
+        (value, url, index) => value.replace(new RegExp(`\\[\\[\\[\\s*URL_${index + 1}\\s*\\]\\]\\]`, "g"), url),
+        translation.text
+    );
+    const missingUrls = urls.filter(url => !restored.includes(url));
+
     return {
         sourceLanguage: !sourceLang || sourceLang === "auto" ? "auto" : sourceName,
-        text: translation.text,
+        text: missingUrls.length ? `${restored} ${missingUrls.join(" ")}` : restored,
         usage: translation.usage
     };
 }

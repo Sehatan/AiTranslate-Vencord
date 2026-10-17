@@ -9,7 +9,7 @@ import { SelectedChannelStore, showToast } from "@webpack/common";
 import { settings } from "./settings";
 import { getTranslation, handleTranslate } from "./TranslationAccessory";
 import { finishTranslation, isTranslationInFlight, tryStartTranslation } from "./translationInFlight";
-import { getTokenCount, translate } from "./utils";
+import { getTokenCount, hasTranslatableText, translate } from "./utils";
 import { getMessageContent, getVisibleMessages, MESSAGE_ITEM_SELECTOR } from "./visibleMessages";
 
 const TRANSLATION_CONCURRENCY = 2;
@@ -134,7 +134,7 @@ export async function translateVisibleMessages(options?: { quiet?: boolean; }) {
 
     const messages = getVisibleMessages(channelId).filter(message => {
         const content = getMessageContent(message);
-        return content && !getTranslation(message.id) && !isTranslationInFlight(message.id);
+        return content && hasTranslatableText(content) && !getTranslation(message.id) && !isTranslationInFlight(message.id);
     });
 
     if (!messages.length) {

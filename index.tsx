@@ -22,7 +22,7 @@ import { settings } from "./settings";
 import { setOutgoingTranslateTooltip, setShouldShowTranslateEnabledTooltip, TranslateChatBarIcon, TranslateIcon } from "./TranslateIcon";
 import { handleTranslate, TranslationAccessory } from "./TranslationAccessory";
 import { finishTranslation, tryStartTranslation } from "./translationInFlight";
-import { detectChannelNameLanguage, translate } from "./utils";
+import { detectChannelNameLanguage, hasTranslatableText, translate } from "./utils";
 import { AutoVisibleTranslateButton, AutoVisibleTranslateIcon, LiveTranslateButton, LiveTranslateIcon, VisibleTranslateButton, VisibleTranslateIcon } from "./VisibleButtons";
 import { getMessageContent } from "./visibleMessages";
 import { setAutoVisibleTranslateEnabled, translateVisibleMessages } from "./visibleTranslate";
@@ -30,13 +30,14 @@ import { startLiveMessageListener, stopLiveMessageListener } from "./liveTransla
 
 const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { message: Message; }) => {
     const content = getMessageContent(message);
+    const canTranslate = !!content && hasTranslatableText(content);
 
     const group = findGroupChildrenByChildId("copy-text", children);
     if (!group) return;
 
     const insertAt = group.findIndex(c => c?.props?.id === "copy-text") + 1;
 
-    if (content) {
+    if (canTranslate) {
         group.splice(insertAt, 0, (
             <Menu.MenuItem
                 id="vc-aitrans"
@@ -57,7 +58,7 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, { message }: { m
         ));
     }
 
-    group.splice(insertAt + (content ? 1 : 0), 0, (
+    group.splice(insertAt + (canTranslate ? 1 : 0), 0, (
         <Menu.MenuItem
             id="vc-aitrans-visible"
             label="AI Translate visible messages"
@@ -109,7 +110,7 @@ export default definePlugin({
         icon: TranslateIcon,
         render(message: Message) {
             const content = getMessageContent(message);
-            if (!content) return null;
+            if (!content || !hasTranslatableText(content)) return null;
 
             return {
                 label: "AI Translate",
@@ -133,7 +134,7 @@ export default definePlugin({
     async onBeforeMessageSend(channelId, message, _options, props) {
         const { aiChannelNameDetection, autoTranslate, translateOutgoing, sentInput, sentOutput, serverLanguageFallback } = settings.store;
         if (!autoTranslate && !translateOutgoing) return;
-        if (!message.content) return;
+        if (!message.content || !hasTranslatableText(message.content)) return;
 
         const channel = props?.channel ?? ChannelStore.getChannel(channelId);
         const channelName = channel?.name?.trim() || "";
