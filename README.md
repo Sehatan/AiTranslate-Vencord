@@ -1,4 +1,4 @@
-## Disclaimer
+# Disclaimer
 
 AiTranslate sends the text you choose to translate, and optionally the channel, server, and category names used for language detection, to the external AI provider you configure. Those requests are subject to that provider's terms and privacy policy and may incur charges. AiTranslate is not affiliated with any provider.
 
