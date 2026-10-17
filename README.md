@@ -13,7 +13,7 @@ AI-powered message translation for Vencord, using any OpenAI-compatible chat API
 - **Incoming translation** — translate a message from its right-click menu or the message popover button.
 - **Auto Translate** — translate your outgoing messages automatically using the language found in the channel name.
   - Flags, ISO/country codes, and language names are detected locally with no token cost (`🇯🇵_japanese`, `ES_español`, `general-pl`, `polish-chat`).
-  - Optional **AI channel name detection** (off by default) recognizes names written in their own language, such as `ogólny` or `allgemein`. The server and category names are used as context and results are cached per channel.
+  - Optional **AI channel name detection** (off by default) recognizes channel names written in their own language, such as `ogólny` or `allgemein`. The server and category names are used as context and results are cached per channel.
   - **Server language fallback** uses the server's preferred language, including English, when the channel name is inconclusive.
   - A language badge on the chat bar button previews the target language; Shift-click or right-click the button to toggle Auto Translate.
 - **Translate outgoing messages** — optional setting that translates messages you send to your chosen outgoing target; when Auto Translate is on, a channel language takes priority.
