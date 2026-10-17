@@ -1,20 +1,30 @@
-# MediaFavourites
+## Disclaimer
 
-Save images and videos from Discord chat to your GIF favourites with star buttons under messages or the message context menu.
+AiTranslate sends the text you choose to translate, and optionally the channel, server, and category names used for language detection, to the external AI provider you configure. Those requests are subject to that provider's terms and privacy policy and may incur charges. AiTranslate is not affiliated with any provider. Use a restricted API key and avoid translating sensitive content.
 
-> MediaFavourites is a **Vencord userplugin**. It is not a BetterDiscord plugin and cannot be installed as a normal Vencord plugin.
+# AiTranslate
+
+AI-powered message translation for Vencord, using any OpenAI-compatible chat API. Translate incoming messages, your own outgoing messages, visible chat text, or new messages as they arrive.
+
+> AiTranslate is a **Vencord userplugin**. It is not a BetterDiscord plugin and cannot be installed through the normal Vencord installer.
 
 ## Features
 
-- **Favourite buttons under messages** that contain images or videos.
-  - A white outline star means the media is not saved; a gold star means it is already in your favourites.
-  - Click the star to add or remove it.
-- **Context menu** — right-click a message and choose **Add image/video to favourites** or **Remove … from favourites**.
-- **Multiple attachments** — every eligible image and video in a message gets its own star and, when needed, its own context-menu entry.
-- **Discord GIF favourites** — saved media appears in the normal **GIFs → Favourites** picker and can be sent like any other favourite.
-- **Full-size URLs** — stores the original CDN link instead of Discord's resized chat thumbnail, so images are not silently downscaled.
-- **Supported media** — PNG, JPG/JPEG, WebP, AVIF, GIF, BMP, MP4, and WebM. Direct media links and image/video embeds work.
-- **Safe defaults** — the star buttons ignore emoji, avatars, reactions, stickers, spoilers, and media smaller than 64×40. GIFs keep Discord's own favourite star, so MediaFavourites leaves them to Discord's star and the context menu.
+- **Incoming translation** — translate a message from its right-click menu or the message popover button.
+- **Auto Translate** — translate your outgoing messages automatically using the language found in the channel name.
+  - Flags, ISO/country codes, and language names are detected locally with no token cost (`🇯🇵_japanese`, `ES_español`, `general-pl`, `polish-chat`).
+  - Optional **AI channel name detection** (off by default) recognizes names written in their own language, such as `ogólny` or `allgemein`. The server and category names are used as context and results are cached per channel.
+  - **Server language fallback** uses the server's preferred language, including English, when the channel name is inconclusive.
+  - A language badge on the chat bar button previews the target language; Shift-click or right-click the button to toggle Auto Translate.
+- **Translate outgoing messages** — optional setting that translates messages you send to your chosen outgoing target; when Auto Translate is on, a channel language takes priority.
+- **Three quick-translation chat bar buttons**
+  - **Eye** — translate the currently visible messages once. The same one-shot action is also in the message context menu.
+  - **Circular arrow** — keep translating messages that become visible while scrolling.
+  - **Lightning** — translate new incoming messages in the current channel as they arrive.
+  - Each of these buttons has a first-use warning with **Don't show this warning again**.
+- **Token controls** — per-message token usage, prompt/completion/reasoning details on hover, and running token totals on the three chat bar buttons. The scrolling and live modes update their totals as messages are translated.
+- **Provider presets** — KoboldCPP, OpenAI, OpenRouter, Groq, Together AI, Mistral AI, DeepSeek, xAI, Cerebras, Fireworks AI, Ollama, LM Studio, or any custom OpenAI-compatible URL.
+- **Useful settings** — model, temperature, max tokens, **Disable thinking**, **Test API connection**, and a choice of incoming/outgoing source and target languages.
 
 ## Installation
 
@@ -28,10 +38,10 @@ Save images and videos from Discord chat to your GIF favourites with star button
 3. Clone this repository:
 
    ```sh
-   git clone https://github.com/Sehatan/MediaFavourites-Vencord.git
+   git clone https://github.com/Sehatan/AiTranslate-Vencord.git
    ```
 
-   This creates `src/userplugins/MediaFavourites-Vencord/` with `index.tsx` at its root.
+   This creates `src/userplugins/AiTranslate-Vencord/` with `index.tsx` at its root.
 
 4. Return to the Vencord folder and build:
 
@@ -43,30 +53,35 @@ Save images and videos from Discord chat to your GIF favourites with star button
    ```
 
 5. Fully restart Discord.
-6. Open **Settings → Vencord → Plugins** and enable **MediaFavourites**.
-7. Find a message with an image or video and click the star below it, then open **GIFs → Favourites**.
+6. Open **Settings → Vencord → Plugins** and enable **AiTranslate**.
 
 If you previously installed by copying the folder, remove the old copy first so only one copy of the plugin exists in `userplugins`. To update later, run `git pull` inside the cloned folder and rebuild.
 
 More information: [Vencord custom plugins](https://docs.vencord.dev/installing/custom-plugins/).
 
+## Setup
+
+1. Open AiTranslate's plugin settings.
+2. Choose an **API provider**, or use **Other / custom URL**.
+3. Enter the **API key** if the provider requires one. Local servers can usually leave it empty.
+4. Leave **Model** empty to use the preset default, or enter the exact model ID.
+5. Click **Test API connection** to verify the endpoint.
+
+The API URL and key are stored in your local Vencord settings. Translation requests go directly from your client to the provider you configure.
+
 ## Usage
 
-- **Add:** click the outline star under a message with media, or use the message context menu.
-- **Remove:** click the gold star again, or use the context menu.
-- **Find saved media:** open the emoji/GIF picker and switch to **Favourites**.
-- **Settings** (under **Settings → Vencord → Plugins → MediaFavourites**):
-  - **Show favourite star buttons under messages that contain images or videos** — turn the buttons off and keep only the context menu.
+- Open the **AI Translate** modal from the chat bar button or from the plugin settings to choose incoming/outgoing languages and Auto Translate options.
+- Translate a single incoming message from its context menu or popover button.
+- Use the three chat bar buttons for visible, scrolling, and live translation.
+- When **Show token usage** is enabled, translated messages show their token counts; the chat bar buttons show running totals whenever the provider reports usage.
 
-## Notes and limitations
+## Notes
 
-- Saves the media URL, **not the file**. Discord's normal favourites size limit still applies.
-- Existing Discord favourites are preserved; this plugin uses Discord's native favourites storage and picker.
-- Discord attachment links can expire. If an old favourite stops loading, favourite it again from the original message.
-- YouTube/Twitch watch pages are not video files and are not supported.
-- Video codec support depends on Discord's Chromium build; MP4/H.264 and WebM are the intended formats.
-- The stars are a normal React message accessory, so they do not rely on Discord's image/video DOM layout.
-- Does not download, re-upload, or bypass access permissions.
+- AI features use provider tokens. Local detection (flags, codes, and language names) is free.
+- AI channel name detection is off by default and only runs when enabled.
+- Translation quality and supported languages depend on the selected model.
+- The scrolling and live chat bar modes are session-only: they turn off when the plugin stops or Discord restarts.
 
 ## Credits
 
